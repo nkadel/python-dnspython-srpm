@@ -75,7 +75,10 @@ Release:        0%{?dist}
 Url:            http://www.dnspython.org
 Summary:        DNS toolkit
 License:        BSD-like (FIXME:No SPDX)
+# macro is broken for python3 and rhel 7
+%if 0%{?rhel} != 7
 %{?python_provide:%python_provide python3-dnspython}
+%endif
 %endif # with_python3
 
 %description
