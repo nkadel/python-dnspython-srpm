@@ -6,7 +6,8 @@
 
 # Fedora and RHEL split python2 and python3
 # Older RHEL does not include python3 by default
-%if 0%{?fedora} || 0%{?rhel} > 7
+#%if 0%{?fedora} || 0%{?rhel} > 7
+%if 0%{?fedora} || 0%{?rhel} > 6
 %global with_python3 1
 %else
 %global with_python3 0
@@ -19,11 +20,9 @@
 %global with_python2 1
 %endif
 
-# Older RHEL does not use dnf, does not support "Suggests"
-%if 0%{?fedora} || 0%{?rhel} > 7
-%global with_dnf 1
-%else
-%global with_dnf 0
+# Use Python 3.6, not 3.4
+%if 0%{?rhel} == 7
+%global __python3 /usr/bin/python3.6
 %endif
 
 # Common SRPM package
@@ -48,8 +47,13 @@ BuildRequires:  python2-setuptools
 %endif # rhel
 %endif # with_python2
 %if 0%{with_python3}
+%if 0%{?rhel} == 7
+BuildRequires:  python36-devel
+BuildRequires:  python36-setuptools
+%else
 BuildRequires:  python3-devel
 BuildRequires:  python3-setuptools
+%endif # rhel == 7
 %endif # with_python3
 
 %if 0%{with_python2}
@@ -59,9 +63,9 @@ Release:        0%{?dist}
 Url:            http://www.dnspython.org
 Summary:        DNS toolkit
 License:        BSD-like (FIXME:No SPDX)
-%if 0%{with_dnf}
-%endif # with_dnf
 %{?python_provide:%python_provide python2-dnspython}
+# Added for RHEL with python-dnspython
+Obsoletes: python-dnspython < %{version}-%{release}
 %endif # with_python2
 
 %if 0%{with_python3}
@@ -71,8 +75,6 @@ Release:        0%{?dist}
 Url:            http://www.dnspython.org
 Summary:        DNS toolkit
 License:        BSD-like (FIXME:No SPDX)
-%if 0%{with_dnf}
-%endif # with_dnf
 %{?python_provide:%python_provide python3-dnspython}
 %endif # with_python3
 
@@ -154,3 +156,7 @@ rm -rf %{buildroot}
 %endif # with_python3
 
 %changelog
+* Sat Apr 13 2019 Nico Kadel-Garcia <nkadel@gmail.com> - 1.16.0-0
+- Create python2 and python3 RPMs with py2pack
+- Add Obsolete line for old "python-" package on RHEL
+
